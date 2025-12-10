@@ -157,7 +157,7 @@ struct Board {
         frame.append(leftPad, ' ');
         frame += title;
         frame.append(rightPad, ' ');
-        frame += '|';
+        frame += "|  NEXT PIECE  |\n";
         frame.append(13, ' ');
         frame += "|\n";
 
@@ -199,8 +199,9 @@ struct Board {
 
             // Draw right side panel with next piece preview and stats
             if (i == 0) {
-                // Label for next piece
-                frame += "  NEXT PIECE |";
+                // Label for next piece (13 chars + border)
+                frame.append(13, ' ');
+                frame += '|';
             } else if (i >= 1 && i <= 3) {
                 // Draw next piece preview (reduced to 3 rows instead of 4)
                 // Preview: 4 blocks × "[]" = 8 visual chars + ANSI codes
