@@ -1446,5 +1446,13 @@ int main() {
 
     TetrisGame game;
     game.run();
+
+    // Restore terminal to normal state
+    cout << "\033[2J";        // Clear screen
+    cout << "\033[1;1H";      // Move cursor to top-left
+    cout << "\033[?25h";      // Show cursor
+    cout << COLOR_RESET;      // Reset colors
+    cout.flush();
+
     return 0;
 }
