@@ -157,9 +157,7 @@ struct Board {
         frame.append(leftPad, ' ');
         frame += title;
         frame.append(rightPad, ' ');
-        frame += "|  NEXT PIECE  |\n";
-        frame.append(13, ' ');
-        frame += "|\n";
+        frame += "|  NEXT PIECE |\n";
 
         // Divider
         frame += '+';
@@ -186,7 +184,7 @@ struct Board {
                 } else if (cell != ' ') {
                     // Non-empty cell: show as [] with color
                     frame += getColorForPiece(cell);
-                    frame.append("[]");
+                    frame.append("██");
                     frame += COLOR_RESET;
                 } else {
                     // Empty cell: show as two spaces
@@ -198,39 +196,41 @@ struct Board {
             frame += '|';
 
             // Draw right side panel with next piece preview and stats
-            if (i == 0) {
-                // Label for next piece (13 chars + border)
-                frame.append(13, ' ');
-                frame += '|';
-            } else if (i >= 1 && i <= 3) {
-                // Draw next piece preview (reduced to 3 rows instead of 4)
+            if (i >= 0 && i <= 2) {
+                // Draw next piece preview (rows 0-2 starting from top)
                 // Preview: 4 blocks × "[]" = 8 visual chars + ANSI codes
                 // Total visual width needed: 13 chars
                 // Padding: (13 - 8) / 2 = 2.5 → left=2, right=3
-                frame += "  ";  // 2 spaces left padding
-                frame += nextPieceLines[i - 1];  // 8 visual chars (with color codes)
-                frame += "   |";  // 3 spaces right padding + border
-            } else if (i == 4) {
+                frame += "    ";  // 4 spaces left padding
+                frame += nextPieceLines[i];  // 8 visual chars (with color codes)
+                frame += " |";  // 2 spaces right padding + border
+            } else if (i == 3) {
                 frame.append(13, '-');
                 frame += '|';
+            } else if (i == 4) {
+                // Score label
+                frame += "    SCORE:   |";
             } else if (i == 5) {
-                // Score display - 13 chars total
+                // Score value - right aligned
                 char buf[15];
-                snprintf(buf, sizeof(buf), " SCORE:%-6d", state.score);
+                snprintf(buf, sizeof(buf), " %10d  |", state.score);
                 frame += buf;
-                frame += '|';
             } else if (i == 6) {
-                // Level display - 13 chars total
-                char buf[15];
-                snprintf(buf, sizeof(buf), " LEVEL:%-6d", state.level);
-                frame += buf;
-                frame += '|';
+                // Level label
+                frame += "    LEVEL:   |";
             } else if (i == 7) {
-                // Lines cleared display - 13 chars total
+                // Level value - right aligned
                 char buf[15];
-                snprintf(buf, sizeof(buf), " LINES:%-6d", state.linesCleared);
+                snprintf(buf, sizeof(buf), " %10d  |", state.level);
                 frame += buf;
-                frame += '|';
+            } else if (i == 8) {
+                // Lines label
+                frame += "    LINES:   |";
+            } else if (i == 9) {
+                // Lines value - right aligned
+                char buf[15];
+                snprintf(buf, sizeof(buf), " %10d  |", state.linesCleared);
+                frame += buf;
             } else {
                 frame.append(13, ' ');
                 frame += '|';
@@ -826,7 +826,7 @@ struct TetrisGame {
                 if (cell != ' ') {
                     // Show piece block with color
                     lines[row] += PIECE_COLORS[nextPieceType];
-                    lines[row].append("[]");
+                    lines[row].append("██");
                     lines[row] += COLOR_RESET;
                 } else {
                     // Empty space
