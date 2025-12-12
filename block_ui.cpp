@@ -142,14 +142,14 @@ struct Board {
         // Right panel width: 14 chars (13 content + 1 border)
         int boardVisualWidth = BOARD_WIDTH * 2;  // Each cell is 2 chars wide
 
-        frame += "╔";
-        for (int i = 0; i < boardVisualWidth; i++) frame += "═";
-        frame += "╦";
-        for (int i = 0; i < 13; i++) frame += "═";
-        frame += "╗\n";
+        frame += '+';
+        frame.append(boardVisualWidth, '-');
+        frame += '+';
+        frame.append(13, '-');
+        frame += "+\n";
 
         // Title row
-        frame += "║";
+        frame += '|';
         int totalPadding = boardVisualWidth - title.size();
         int leftPad = totalPadding / 2;
         int rightPad = totalPadding - leftPad;
@@ -157,19 +157,19 @@ struct Board {
         frame.append(leftPad, ' ');
         frame += title;
         frame.append(rightPad, ' ');
-        frame += "║  NEXT PIECE ║\n";
+        frame += "|  NEXT PIECE |\n";
 
         // Divider
-        frame += "╠";
-        for (int i = 0; i < boardVisualWidth; i++) frame += "═";
-        frame += "╬";
-        for (int i = 0; i < 13; i++) frame += "═";
-        frame += "╣\n";
+        frame += '+';
+        frame.append(boardVisualWidth, '-');
+        frame += '+';
+        frame.append(13, '-');
+        frame += "+\n";
 
         // Draw board rows with borders
         for (int i = 0; i < BOARD_HEIGHT; ++i) {
             // Left border
-            frame += "║";
+            frame += '|';
 
             // Draw board cells WITH colors
             for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -193,77 +193,58 @@ struct Board {
             }
 
             // Right border
-            frame += "║";
+            frame += '|';
 
             // Draw right side panel with next piece preview and stats
-            if (i == 0) {
-                // Top padding for next piece preview
-                frame.append(13, ' ');
-                frame += "║";
-            } else if (i >= 1 && i <= 4) {
-                // Draw next piece preview (rows 1-4 for I-piece vertical)
-                // Preview: 4 blocks × "██" = 8 visual chars + ANSI codes
+            if (i >= 0 && i <= 2) {
+                // Draw next piece preview (rows 0-2 starting from top)
+                // Preview: 4 blocks × "[]" = 8 visual chars + ANSI codes
                 // Total visual width needed: 13 chars
                 // Padding: (13 - 8) / 2 = 2.5 → left=2, right=3
-                frame += "  ";  // 2 spaces left padding
-                frame += nextPieceLines[i - 1];  // 8 visual chars (with color codes)
-                frame += "   ║";  // 3 spaces right padding + border
-            } else if (i == 5) {
-                // Bottom padding for next piece preview
-                frame.append(13, ' ');
-                frame += "║";
-            } else if (i == 6) {
-                for (int k = 0; k < 13; k++) frame += "─";
-                frame += "║";
-            } else if (i == 7) {
+                frame += "    ";  // 4 spaces left padding
+                frame += nextPieceLines[i];  // 8 visual chars (with color codes)
+                frame += " |";  // 2 spaces right padding + border
+            } else if (i == 3) {
+                frame.append(13, '-');
+                frame += '|';
+            } else if (i == 4) {
                 // Score label
-                frame += " SCORE:      ║";
-            } else if (i == 8) {
-                // Score value - left aligned, flexible width
-                string scoreStr = to_string(state.score);
-                frame += " ";
-                frame += scoreStr;
-                // Pad remaining space (12 - scoreStr.length())
-                int padding = 12 - scoreStr.length();
-                if (padding > 0) frame.append(padding, ' ');
-                frame += "║";
-            } else if (i == 9) {
+                frame += "    SCORE:   |";
+            } else if (i == 5) {
+                // Score value - right aligned
+                char buf[15];
+                snprintf(buf, sizeof(buf), " %10d  |", state.score);
+                frame += buf;
+            } else if (i == 6) {
                 // Level label
-                frame += " LEVEL:      ║";
-            } else if (i == 10) {
-                // Level value - left aligned, flexible width
-                string levelStr = to_string(state.level);
-                frame += " ";
-                frame += levelStr;
-                // Pad remaining space (12 - levelStr.length())
-                int padding = 12 - levelStr.length();
-                if (padding > 0) frame.append(padding, ' ');
-                frame += "║";
-            } else if (i == 11) {
+                frame += "    LEVEL:   |";
+            } else if (i == 7) {
+                // Level value - right aligned
+                char buf[15];
+                snprintf(buf, sizeof(buf), " %10d  |", state.level);
+                frame += buf;
+            } else if (i == 8) {
                 // Lines label
-                frame += " LINES:      ║";
-            } else if (i == 12) {
-                // Lines value - left aligned, flexible width
-                string linesStr = to_string(state.linesCleared);
-                frame += " ";
-                frame += linesStr;
-                // Pad remaining space (12 - linesStr.length())
-                int padding = 12 - linesStr.length();
-                if (padding > 0) frame.append(padding, ' ');
-                frame += "║";
+                frame += "    LINES:   |";
+            } else if (i == 9) {
+                // Lines value - right aligned
+                char buf[15];
+                snprintf(buf, sizeof(buf), " %10d  |", state.linesCleared);
+                frame += buf;
             } else {
                 frame.append(13, ' ');
-                frame += "║";
+                frame += '|';
             }
+
             frame += '\n';
         }
 
         // Bottom border
-        frame += "╚";
-        for (int i = 0; i < boardVisualWidth; i++) frame += "═";
-        frame += "╩";
-        for (int i = 0; i < 13; i++) frame += "═";
-        frame += "╝\n";
+        frame += '+';
+        frame.append(boardVisualWidth, '-');
+        frame += '+';
+        frame.append(13, '-');
+        frame += "+\n";
 
         frame += "Controls: A/D (Move)  W (Rotate)  S (Soft Drop)  SPACE (Hard Drop)  G (Ghost)  P (Pause)  Q (Quit)\n";
 
@@ -432,15 +413,15 @@ struct TetrisGame {
         // Board visual width: BOARD_WIDTH × 2 (for "[]") + right panel (13) = 30 + 13 = 43
         int totalWidth = (BOARD_WIDTH * 2) + 13; // Match game board visual width
 
-        // Top border
-        screen += "╔";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╗\n";
+        // Top border (ASCII)
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Title row - "TETRIS GAME"
         const string title = "TETRIS GAME";
@@ -448,16 +429,16 @@ struct TetrisGame {
         int titleLeft = titlePadding / 2;
         int titleRight = titlePadding - titleLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(titleLeft, ' ');
         screen += title;
         screen.append(titleRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // "Press any key to start..." row
         const string prompt = "Press any key to start...";
@@ -465,21 +446,21 @@ struct TetrisGame {
         int promptLeft = promptPadding / 2;
         int promptRight = promptPadding - promptLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(promptLeft, ' ');
         screen += prompt;
         screen.append(promptRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Bottom border
-        screen += "╚";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╝\n";
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Single output call - no flush needed
         cout << screen;
@@ -559,14 +540,14 @@ struct TetrisGame {
         int totalWidth = (BOARD_WIDTH * 2) + 13; // Match game board visual width
 
         // Top border
-        screen += "╔";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╗\n";
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // "GAME OVER" title
         const string title = "GAME OVER";
@@ -574,16 +555,16 @@ struct TetrisGame {
         int titleLeft = titlePadding / 2;
         int titleRight = titlePadding - titleLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(titleLeft, ' ');
         screen += title;
         screen.append(titleRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Score display
         char scoreBuf[64];
@@ -593,11 +574,11 @@ struct TetrisGame {
         int scoreLeft = scorePadding / 2;
         int scoreRight = scorePadding - scoreLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(scoreLeft, ' ');
         screen += scoreStr;
         screen.append(scoreRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Level display
         char levelBuf[64];
@@ -607,11 +588,11 @@ struct TetrisGame {
         int levelLeft = levelPadding / 2;
         int levelRight = levelPadding - levelLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(levelLeft, ' ');
         screen += levelStr;
         screen.append(levelRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Lines display
         char linesBuf[64];
@@ -621,16 +602,16 @@ struct TetrisGame {
         int linesLeft = linesPadding / 2;
         int linesRight = linesPadding - linesLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(linesLeft, ' ');
         screen += linesStr;
         screen.append(linesRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Rank display with ordinal suffix
         char rankBuf[64];
@@ -644,16 +625,16 @@ struct TetrisGame {
         int rankLeft = rankPadding / 2;
         int rankRight = rankPadding - rankLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(rankLeft, ' ');
         screen += rankStr;
         screen.append(rankRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // "Press R to Restart or Q to Quit" prompt
         const string prompt = "Press R to Restart or Q to Quit";
@@ -661,21 +642,21 @@ struct TetrisGame {
         int promptLeft = promptPadding / 2;
         int promptRight = promptPadding - promptLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(promptLeft, ' ');
         screen += prompt;
         screen.append(promptRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Bottom border
-        screen += "╚";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╝\n";
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Single output call - no flush needed
         cout << screen;
@@ -720,15 +701,15 @@ struct TetrisGame {
         int totalWidth = (BOARD_WIDTH * 2) + 13; // Match game board visual width
 
         // Top border
-        screen += "╔";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╗\n";
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Empty rows for spacing
         for (int i = 0; i < 3; ++i) {
-            screen += "║";
+            screen += '|';
             screen.append(totalWidth, ' ');
-            screen += "║\n";
+            screen += "|\n";
         }
 
         // "GAME PAUSED" title
@@ -737,16 +718,16 @@ struct TetrisGame {
         int titleLeft = titlePadding / 2;
         int titleRight = titlePadding - titleLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(titleLeft, ' ');
         screen += title;
         screen.append(titleRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Current stats - Score
         char scoreBuf[64];
@@ -756,11 +737,11 @@ struct TetrisGame {
         int scoreLeft = scorePadding / 2;
         int scoreRight = scorePadding - scoreLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(scoreLeft, ' ');
         screen += scoreStr;
         screen.append(scoreRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Level
         char levelBuf[64];
@@ -770,11 +751,11 @@ struct TetrisGame {
         int levelLeft = levelPadding / 2;
         int levelRight = levelPadding - levelLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(levelLeft, ' ');
         screen += levelStr;
         screen.append(levelRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Lines
         char linesBuf[64];
@@ -784,16 +765,16 @@ struct TetrisGame {
         int linesLeft = linesPadding / 2;
         int linesRight = linesPadding - linesLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(linesLeft, ' ');
         screen += linesStr;
         screen.append(linesRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty row
-        screen += "║";
+        screen += '|';
         screen.append(totalWidth, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Menu options
         const string resumeOption = "P - Resume";
@@ -801,76 +782,45 @@ struct TetrisGame {
         int resumeLeft = resumePadding / 2;
         int resumeRight = resumePadding - resumeLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(resumeLeft, ' ');
         screen += resumeOption;
         screen.append(resumeRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         const string quitOption = "Q - Quit";
         int quitPadding = totalWidth - quitOption.length();
         int quitLeft = quitPadding / 2;
         int quitRight = quitPadding - quitLeft;
 
-        screen += "║";
+        screen += '|';
         screen.append(quitLeft, ' ');
         screen += quitOption;
         screen.append(quitRight, ' ');
-        screen += "║\n";
+        screen += "|\n";
 
         // Empty rows for spacing
         for (int i = 0; i < 3; ++i) {
-            screen += "║";
+            screen += '|';
             screen.append(totalWidth, ' ');
-            screen += "║\n";
+            screen += "|\n";
         }
 
         // Bottom border
-        screen += "╚";
-        for (int i = 0; i < totalWidth; i++) screen += "═";
-        screen += "╝\n";
+        screen += '+';
+        screen.append(totalWidth, '-');
+        screen += "+\n";
 
         // Single output call - no flush needed
         cout << screen;
     }
 
-    // Helper to count visual width (number of non-empty blocks)
-    int getLineVisualWidth(int pieceType, int rotation, int row) const {
-        int width = 0;
-        int firstBlock = -1;
-        int lastBlock = -1;
-
-        for (int col = 0; col < 4; ++col) {
-            char cell = BlockTemplate::getCell(pieceType, rotation, row, col);
-            if (cell != ' ') {
-                if (firstBlock == -1) firstBlock = col;
-                lastBlock = col;
-            }
-        }
-
-        if (firstBlock != -1) {
-            width = (lastBlock - firstBlock + 1) * 2; // Each block is 2 chars wide
-        }
-        return width;
-    }
-
     void getNextPiecePreview(string lines[4]) const {
-        // Render the next piece as 4 lines WITH colors and centering
+        // Render the next piece as 4 lines WITH colors
         for (int row = 0; row < 4; ++row) {
             lines[row].clear();
             lines[row].reserve(64);  // Pre-allocate for 4 blocks × 2 chars + ANSI codes
 
-            // Calculate visual width for this row
-            int visualWidth = getLineVisualWidth(nextPieceType, 0, row);
-
-            // Center the piece in 8-char space (4 blocks × 2)
-            int leftPad = (8 - visualWidth) / 2;
-            int rightPad = 8 - visualWidth - leftPad;
-
-            // Add left padding
-            lines[row].append(leftPad, ' ');
-
-            // Render the piece blocks (only the occupied columns)
             for (int col = 0; col < 4; ++col) {
                 char cell = BlockTemplate::getCell(nextPieceType, 0, row, col);
 
@@ -879,11 +829,11 @@ struct TetrisGame {
                     lines[row] += PIECE_COLORS[nextPieceType];
                     lines[row].append("██");
                     lines[row] += COLOR_RESET;
+                } else {
+                    // Empty space
+                    lines[row].append("  ");
                 }
             }
-
-            // Add right padding
-            lines[row].append(rightPad, ' ');
         }
     }
 
