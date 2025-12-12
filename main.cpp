@@ -388,6 +388,7 @@ struct TetrisGame {
     int nextPieceType{0};  // Store the type of next piece to display
 
     termios origTermios{};
+    int origFlags{0};            // Store original file descriptor flags
     long dropSpeedUs{BASE_DROP_SPEED_US};
     int dropCounter{0};
     bool softDropActive{false};  // Track if 's' key is being held for soft drop
@@ -883,12 +884,13 @@ struct TetrisGame {
 
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 
-        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+        origFlags = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, origFlags | O_NONBLOCK);
     }
 
     void disableRawMode() {
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &origTermios);
+        fcntl(STDIN_FILENO, F_SETFL, origFlags);  // Restore original flags
     }
 
     char getInput() const {
