@@ -584,47 +584,38 @@ struct TetrisGame {
         screen.append(totalWidth, ' ');
         screen += "║\n";
 
-        // Score display
-        char scoreBuf[64];
-        snprintf(scoreBuf, sizeof(scoreBuf), "Final Score: %d", state.score);
-        string scoreStr(scoreBuf);
-        int scorePadding = totalWidth - scoreStr.length();
-        int scoreLeft = scorePadding / 2;
-        int scoreRight = scorePadding - scoreLeft;
+        // Score display - label left aligned, number right aligned
+        string scoreLabel = "Final Score:";
+        string scoreNum = to_string(state.score);
+        int scoreSpacing = totalWidth - scoreLabel.length() - scoreNum.length();
 
-        screen += "║";
-        screen.append(scoreLeft, ' ');
-        screen += scoreStr;
-        screen.append(scoreRight, ' ');
-        screen += "║\n";
+        screen += "║ ";
+        screen += scoreLabel;
+        screen.append(scoreSpacing - 2, ' '); // -2 for the left and right padding
+        screen += scoreNum;
+        screen += " ║\n";
 
-        // Level display
-        char levelBuf[64];
-        snprintf(levelBuf, sizeof(levelBuf), "Level: %d", state.level);
-        string levelStr(levelBuf);
-        int levelPadding = totalWidth - levelStr.length();
-        int levelLeft = levelPadding / 2;
-        int levelRight = levelPadding - levelLeft;
+        // Level display - label left aligned, number right aligned
+        string levelLabel = "Level:";
+        string levelNum = to_string(state.level);
+        int levelSpacing = totalWidth - levelLabel.length() - levelNum.length();
 
-        screen += "║";
-        screen.append(levelLeft, ' ');
-        screen += levelStr;
-        screen.append(levelRight, ' ');
-        screen += "║\n";
+        screen += "║ ";
+        screen += levelLabel;
+        screen.append(levelSpacing - 2, ' '); // -2 for the left and right padding
+        screen += levelNum;
+        screen += " ║\n";
 
-        // Lines display
-        char linesBuf[64];
-        snprintf(linesBuf, sizeof(linesBuf), "Lines Cleared: %d", state.linesCleared);
-        string linesStr(linesBuf);
-        int linesPadding = totalWidth - linesStr.length();
-        int linesLeft = linesPadding / 2;
-        int linesRight = linesPadding - linesLeft;
+        // Lines display - label left aligned, number right aligned
+        string linesLabel = "Lines Cleared:";
+        string linesNum = to_string(state.linesCleared);
+        int linesSpacing = totalWidth - linesLabel.length() - linesNum.length();
 
-        screen += "║";
-        screen.append(linesLeft, ' ');
-        screen += linesStr;
-        screen.append(linesRight, ' ');
-        screen += "║\n";
+        screen += "║ ";
+        screen += linesLabel;
+        screen.append(linesSpacing - 2, ' '); // -2 for the left and right padding
+        screen += linesNum;
+        screen += " ║\n";
 
         // Empty row
         screen += "║";
