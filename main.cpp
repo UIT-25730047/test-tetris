@@ -410,7 +410,6 @@ struct TetrisGame {
     int origFlags{0};            // Store original file descriptor flags
     long dropSpeedUs{BASE_DROP_SPEED_US};
     int dropCounter{0};
-    bool softDropActive{false};  // Track if 's' key is being held for soft drop
     bool needsRedraw{true};      // Flag to track if screen needs to be redrawn
 
     mt19937 rng;
@@ -697,7 +696,6 @@ struct TetrisGame {
 
         // Reset timing
         dropCounter = 0;
-        softDropActive = false;
 
         // Generate new next piece
         uniform_int_distribution<int> dist(0, NUM_BLOCK_TYPES - 1);
@@ -1247,14 +1245,6 @@ struct TetrisGame {
     void handleInput() {
         char c = getInput();
 
-        // Always update soft drop state based on current input
-        // This ensures it's immediately deactivated when 's' is released
-        if (c == 's' && !state.paused) {
-            softDropActive = true;
-        } else {
-            softDropActive = false;
-        }
-
         if (c == 0) return;
 
         // Handle pause input regardless of pause state
@@ -1299,10 +1289,7 @@ struct TetrisGame {
                     needsRedraw = true;
                 }
                 break;
-            case 's': // soft drop (hold) - handled by gravity system
-                // Just keep softDropActive = true (already set above)
-                break;
-            case 'x': // soft drop one cell (instant)
+            case 's': // soft drop - instant drop one cell each press
                 softDrop();
                 needsRedraw = true;
                 break;
@@ -1340,11 +1327,8 @@ struct TetrisGame {
         ++dropCounter;
 
         // Soft drop is 3x faster: every 1 tick instead of 3 ticks
-        // Normal: 3 ticks × 167ms = ~500ms per drop
-        // Soft drop: 1 tick × 167ms = ~167ms per drop (3x faster)
-        int effectiveInterval = softDropActive ? 1 : DROP_INTERVAL_TICKS;
-
-        if (dropCounter < effectiveInterval) return;
+        // Drop interval: 3 ticks × 167ms = ~500ms per drop
+        if (dropCounter < DROP_INTERVAL_TICKS) return;
 
         dropCounter = 0;
         needsRedraw = true; // Gravity triggered, need to redraw
@@ -1380,7 +1364,6 @@ struct TetrisGame {
 
             board.init();
             dropCounter = 0;
-            softDropActive = false;
             needsRedraw = true;  // Force initial render when game starts
 
             // Initialize the first next piece
