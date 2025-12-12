@@ -177,9 +177,9 @@ struct Board {
 
                 // Render based on cell content with colors
                 if (cell == '.') {
-                    // Ghost piece: show as dots with white color
+                    // Ghost piece: show as [] with white color
                     frame += COLOR_WHITE;
-                    frame.append(" ·");  // Space + middle dot for centering
+                    frame.append("[]");
                     frame += COLOR_RESET;
                 } else if (cell != ' ') {
                     // Non-empty cell: show as [] with color
