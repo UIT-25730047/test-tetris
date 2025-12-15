@@ -140,16 +140,20 @@ struct SoundManager {
 
         system(cmd.c_str());
     }
-    
+
     static void stopBackgroundSound() {
-        // Kills all "play" processes running in loop
-        system("pkill -f \"play .*background_sound_01.mp3\" >/dev/null 2>&1");
+        // Kills all background music processes
+    #if __APPLE__
+        system("pkill -f \"afplay.*background_sound_01.mp3\" >/dev/null 2>&1");
+    #else
+        system("pkill -f \"aplay.*background_sound_01.mp3\" >/dev/null 2>&1");
+    #endif
     }
-    
+
     // Sound effects
     static void playSFX(const std::string& filename) {
         std::string path = soundPath(filename);
-        
+
     #if __APPLE__
         std::string cmd = "afplay \"" + path + "\" &";
     #else
@@ -157,14 +161,14 @@ struct SoundManager {
     #endif
         system(cmd.c_str());
     }
-    
+
     static void playSoundAfterDelay(const std::string& file, int delayMs) {
         std::thread([file, delayMs]() {
             std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
             playSFX(file);
         }).detach();
     }
-    
+
     // Soft drop
     static const char* getSoftDropSoundFile() { return "soft_drop.mp3"; }
     static void playSoftDropSound() {
@@ -222,7 +226,7 @@ struct Board {
 
     void draw(const GameState& state, const string nextPieceLines[4]) const {
         string frame;
-        frame.reserve(8192); // Increased for colored blocks
+        frame.reserve(12000); // Increased for colored blocks + ANSI codes
 
         // clear screen + move cursor to top-left
         frame += "\033[2J\033[1;1H";
@@ -265,10 +269,8 @@ struct Board {
 
                 // Render based on cell content with colors
                 if (cell == '.') {
-                    // Ghost piece: show as [] with white color
-                    frame += COLOR_WHITE;
+                    // Ghost piece: show as [] (no color needed for outline)
                     frame.append("[]");
-                    frame += COLOR_RESET;
                 } else if (cell != ' ') {
                     // Non-empty cell: show as ██ with color
                     frame += getColorForPiece(cell);
@@ -436,6 +438,13 @@ struct TetrisGame {
     long dropSpeedUs{BASE_DROP_SPEED_US};
     int dropCounter{0};
     bool softDropActive{false};
+
+    // Track ghost piece positions for efficient clearing
+    vector<Position> lastGhostPositions;
+
+    // Cache next piece preview to avoid regenerating every frame
+    string cachedNextPiecePreview[4];
+    int cachedNextPieceType{-1};
 
     mt19937 rng;
 
@@ -848,7 +857,7 @@ struct TetrisGame {
         return x >= 0 && x < BOARD_WIDTH &&
                y >= 0 && y < BOARD_HEIGHT;
     }
-    
+
     // Calculate where the current piece would land if dropped straight down
     Piece calculateGhostPiece() const {
         Piece ghost = currentPiece;
@@ -916,12 +925,6 @@ struct TetrisGame {
                         return false;
                     }
                 }
-
-                // 2. Collision Check: Ensure piece doesn't overlap existing blocks
-                // This logic is crucial for "Touch Roof" detection.
-                if (yt >= 0 && board.grid[yt][xt] != ' ') {
-                    return false;
-                }
             }
         }
         return true;
@@ -966,18 +969,17 @@ struct TetrisGame {
             }
         }
     }
-    
+
     void clearAllGhostDots() {
-        // Clear all ghost dots from the board
-        for (int i = 0; i < BOARD_HEIGHT; ++i) {
-            for (int j = 0; j < BOARD_WIDTH; ++j) {
-                if (board.grid[i][j] == '.') {
-                    board.grid[i][j] = ' ';
-                }
+        // Clear only previously tracked ghost positions (O(n) instead of O(width*height))
+        for (const Position& pos : lastGhostPositions) {
+            if (board.grid[pos.y][pos.x] == '.') {
+                board.grid[pos.y][pos.x] = ' ';
             }
         }
+        lastGhostPositions.clear();
     }
-    
+
     void placeGhostPiece(const Piece& ghostPiece) {
         // Place ghost piece using '.' character for outline effect
         for (int i = 0; i < BLOCK_SIZE; ++i) {
@@ -998,6 +1000,7 @@ struct TetrisGame {
                 // Only draw ghost where there's empty space (don't overwrite actual pieces)
                 if (board.grid[yt][xt] == ' ') {
                     board.grid[yt][xt] = '.';
+                    lastGhostPositions.push_back(Position(xt, yt));
                 }
             }
         }
@@ -1053,7 +1056,7 @@ struct TetrisGame {
             } else {
                 SoundManager::playLineClearSound();
             }
-            
+
             state.linesCleared += lines;
 
             // Scoring rules
@@ -1061,10 +1064,10 @@ struct TetrisGame {
             state.score += scores[lines] * state.level;
 
             int oldLevel = state.level;
-            
+
             // Level progression: +1 level per 10 lines
             state.level = 1 + (state.linesCleared / 10);
-            
+
             if (state.level > oldLevel) {
                 SoundManager::playLevelUpSound();
             }
@@ -1122,7 +1125,7 @@ struct TetrisGame {
             }
             return;
         }
-        
+
         // Handle ghost toggle (can toggle even when paused)
         if (c == 'g') {
             state.ghostEnabled = !state.ghostEnabled;
@@ -1211,11 +1214,19 @@ struct TetrisGame {
         }
     }
 
-    void getNextPiecePreview(string lines[4]) const {
+    void getNextPiecePreview(string lines[4]) {
+        // Use cached preview if next piece hasn't changed
+        if (cachedNextPieceType == nextPieceType) {
+            for (int i = 0; i < 4; ++i) {
+                lines[i] = cachedNextPiecePreview[i];
+            }
+            return;
+        }
+
         // Render the next piece as 4 lines WITH colors (8 chars wide)
         for (int row = 0; row < 4; ++row) {
-            lines[row].clear();
-            lines[row].reserve(64); // Pre-allocate for colors + blocks
+            cachedNextPiecePreview[row].clear();
+            cachedNextPiecePreview[row].reserve(64); // Pre-allocate for colors + blocks
 
             // Render the piece blocks
             for (int col = 0; col < 4; ++col) {
@@ -1223,15 +1234,18 @@ struct TetrisGame {
 
                 if (cell != ' ') {
                     // Show piece block with color
-                    lines[row] += PIECE_COLORS[nextPieceType];
-                    lines[row].append("██");
-                    lines[row] += COLOR_RESET;
+                    cachedNextPiecePreview[row] += PIECE_COLORS[nextPieceType];
+                    cachedNextPiecePreview[row].append("██");
+                    cachedNextPiecePreview[row] += COLOR_RESET;
                 } else {
                     // Empty space
-                    lines[row].append("  ");
+                    cachedNextPiecePreview[row].append("  ");
                 }
             }
+            lines[row] = cachedNextPiecePreview[row];
         }
+
+        cachedNextPieceType = nextPieceType;
     }
 
     void run() {
@@ -1251,7 +1265,7 @@ struct TetrisGame {
 
             // Play background sound
             SoundManager::playBackgroundSound();
-            
+
             // initialize speed for starting level
             updateDifficulty();
             spawnNewPiece();
@@ -1268,10 +1282,10 @@ struct TetrisGame {
                 if (!state.running) break;
 
                 handleGravity();
-                
+
                 // Clear all ghost dots from previous frame
                 clearAllGhostDots();
-                
+
                 // Calculate and draw ghost position (if enabled)
                 if (state.ghostEnabled) {
                     Piece ghostPiece = calculateGhostPiece();
@@ -1308,7 +1322,7 @@ struct TetrisGame {
 
             // Stop background sound
             SoundManager::stopBackgroundSound();
-            
+
             // Show game over screen and wait for user choice
             int rank = saveAndGetRank();
             loadHighScores(); // Reload scores to display updated leaderboard
