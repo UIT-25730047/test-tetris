@@ -134,8 +134,10 @@ struct SoundManager {
         std::string cmd =
             "while true; do afplay \"" + path + "\"; done &";
     #else
+        // Linux: Use mpg123 for MP3 files (fallback to ffplay if not available)
         std::string cmd =
-            "while true; do aplay \"" + path + "\"; done &";
+            "(command -v mpg123 >/dev/null 2>&1 && while true; do mpg123 -q \"" + path + "\"; done) || "
+            "(command -v ffplay >/dev/null 2>&1 && while true; do ffplay -nodisp -autoexit -loglevel quiet \"" + path + "\"; done) &";
     #endif
 
         system(cmd.c_str());
@@ -146,7 +148,9 @@ struct SoundManager {
     #if __APPLE__
         system("pkill -f \"afplay.*background_sound_01.mp3\" >/dev/null 2>&1");
     #else
-        system("pkill -f \"aplay.*background_sound_01.mp3\" >/dev/null 2>&1");
+        // Kill both mpg123 and ffplay processes playing background music
+        system("pkill -f \"mpg123.*background_sound_01.mp3\" >/dev/null 2>&1");
+        system("pkill -f \"ffplay.*background_sound_01.mp3\" >/dev/null 2>&1");
     #endif
     }
 
@@ -157,7 +161,19 @@ struct SoundManager {
     #if __APPLE__
         std::string cmd = "afplay \"" + path + "\" &";
     #else
-        std::string cmd = "aplay \"" + path + "\" &";
+        // Linux: Determine player based on file extension
+        std::string ext = filename.substr(filename.find_last_of('.'));
+        std::string cmd;
+
+        if (ext == ".mp3") {
+            // For MP3: use mpg123 (fallback to ffplay)
+            cmd = "(command -v mpg123 >/dev/null 2>&1 && mpg123 -q \"" + path + "\") || "
+                  "(command -v ffplay >/dev/null 2>&1 && ffplay -nodisp -autoexit -loglevel quiet \"" + path + "\") &";
+        } else {
+            // For WAV: use aplay (fallback to ffplay)
+            cmd = "(command -v aplay >/dev/null 2>&1 && aplay -q \"" + path + "\") || "
+                  "(command -v ffplay >/dev/null 2>&1 && ffplay -nodisp -autoexit -loglevel quiet \"" + path + "\") &";
+        }
     #endif
         system(cmd.c_str());
     }
