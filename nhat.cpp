@@ -604,6 +604,9 @@ struct TetrisGame {
     }
 
     void drawGameOverScreen(int rank) {
+        // Play game over sound
+        SoundManager::playGameOverSound();
+
         // Build entire game over screen in a string buffer for single output
         string screen;
         screen.reserve(1024); // Pre-allocate to avoid reallocation
@@ -1336,9 +1339,6 @@ struct TetrisGame {
                 flushInput();
 
                 animateGameOver();
-
-                // Play game over sound
-                SoundManager::playGameOverSound();
             }
 
             // Stop background sound
