@@ -1279,7 +1279,9 @@ struct TetrisGame {
             drawStartScreen();
             waitForKeyPress();
 
-            // Play background sound
+            // Stop any existing background sound and start fresh
+            SoundManager::stopBackgroundSound();
+            usleep(100000); // Small delay to ensure previous process is killed
             SoundManager::playBackgroundSound();
 
             // initialize speed for starting level
@@ -1334,6 +1336,9 @@ struct TetrisGame {
                 flushInput();
 
                 animateGameOver();
+
+                // Play game over sound
+                SoundManager::playGameOverSound();
             }
 
             // Stop background sound
