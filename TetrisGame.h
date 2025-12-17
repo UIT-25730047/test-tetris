@@ -14,7 +14,7 @@ using namespace std;
 // Base drop speed and timing constants (microseconds / ticks).
 constexpr long BASE_DROP_SPEED_US  = 500000; // Base tick group duration.
 constexpr int  DROP_INTERVAL_TICKS = 5;      // Logic steps per drop.
-constexpr int  ANIM_DELAY_US       = 15000;  // Game\-over animation delay.
+constexpr int  ANIM_DELAY_US       = 15000;  // Game-over animation delay.
 
 
 class TetrisGame {

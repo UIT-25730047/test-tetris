@@ -48,8 +48,10 @@ void Board::init() {
     }
 }
 
-void Board::draw(const GameState& state,
-                 const std::string nextPieceLines[4]) const {
+void Board::draw(
+    const GameState& state,
+    const std::string nextPieceLines[4]
+) const {
     using std::string;
     string frame;
     frame.reserve(12000); // Enough capacity for ANSI colors and full frame.
@@ -174,7 +176,7 @@ void Board::draw(const GameState& state,
 }
 
 int Board::clearLines() {
-    int writeRow    = BOARD_HEIGHT - 1; // Where we copy down to
+    int writeRow    = BOARD_HEIGHT - 1;
     int linesCleared = 0;
 
     // Start from bottom row and scan upwards.
