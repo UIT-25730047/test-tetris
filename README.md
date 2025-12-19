@@ -103,17 +103,17 @@ Dự án này tái hiện trải nghiệm chơi game Tetris cổ điển trực 
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get update
-sudo apt-get install build-essential g++ alsa-utils mpg123
+sudo apt-get install build-essential g++ alsa-utils mpg123 pulseaudio
 ```
 
 **Fedora/RHEL:**
 ```bash
-sudo dnf install gcc-c++ alsa-utils mpg123
+sudo dnf install gcc-c++ alsa-utils mpg123 pulseaudio
 ```
 
 **Arch Linux:**
 ```bash
-sudo pacman -S base-devel alsa-utils mpg123
+sudo pacman -S base-devel alsa-utils mpg123 pulseaudio
 ```
 
 ### 2. Clone repository
@@ -125,16 +125,12 @@ cd 5ducks-tetris
 
 ### 3. Compile game
 
-**QUAN TRỌNG**: Bạn phải compile **tất cả 5 file .cpp** cùng nhau:
+**QUAN TRỌNG**: Bạn phải compile **tất cả file .cpp** cùng nhau:
 
 ```bash
-g++ -std=c++11 main.cpp TetrisGame.cpp Board.cpp BlockTemplate.cpp SoundManager.cpp -o tetris
+g++ -std=c++11 *.cpp -o tetris
 ```
 
-Hoặc nếu có Makefile:
-```bash
-make
-```
 
 ### 4. Chuẩn bị terminal
 
@@ -176,6 +172,9 @@ sudo apt-get install mpg123
 
 # Hoặc ffplay (fallback)
 sudo apt-get install ffmpeg
+
+# Hoặc pulseaudio (fallback)
+sudo apt-get install pulseaudio
 ```
 
 **Game bị đứng trên macOS:**
@@ -298,6 +297,7 @@ constexpr long BASE_DROP_SPEED_US  = 500000;  // Base tick duration
 constexpr int  DROP_INTERVAL_TICKS = 5;       // Ticks per drop
 constexpr int  LINES_PER_LEVEL     = 10;      // Lines to level up
 constexpr int  ANIM_DELAY_US       = 15000;   // Game over animation delay
+constexpr int  LINES_PER_LEVEL     = 10;      // Lines to level up
 ```
 
 **Board Dimensions** (Board.h):
@@ -308,6 +308,12 @@ constexpr int BOARD_WIDTH  = 15;
 
 ## 👥 Thành Viên Nhóm
 
+**Môn học**: Kỹ Năng Nghề Nghiệp
+
+**Giảng viên**: ThS. Nguyễn Văn Toàn
+
+**Trường**: Trường Đại học Công nghệ Thông tin (UIT)
+
 **Nhóm 5 Ducks** - CN1.K2025.1.CNTT
 
 | Họ và Tên | MSSV | Vai Trò |
@@ -317,10 +323,6 @@ constexpr int BOARD_WIDTH  = 15;
 | Lê Hữu Nhị | 25730048 | Rotation logic, Wall kick, Code refactoring |
 | Nguyễn Duy Thanh | 25730068 | Ghost piece, Sound system, Platform compatibility |
 | Kiều Quang Việt | 25730093 | High scores, Pause/Resume, Game over animation |
-
-**Môn học**: Kỹ Năng Nghề Nghiệp
-**Giảng viên**: ThS. Nguyễn Văn Toàn
-**Trường**: Trường Đại học Công nghệ Thông tin (UIT)
 
 ## 🔧 Công Cụ Phát Triển
 

@@ -90,7 +90,7 @@
     % --- Thông tin lớp & giảng viên ---
     {\Large
     \begin{tabular}{rl}
-        \textbf{Lớp học phần:}    & CN1.K2025.1.CNTT \\[6pt]
+        \textbf{Lớp:}    & CN1.K2025.1.CNTT \\[6pt]
         \textbf{Môn học:}         & Kỹ năng nghề nghiệp \\[6pt]
         \textbf{Giảng viên hướng dẫn:} & ThS. Nguyễn Văn Toàn \\[12pt]
     \end{tabular}
@@ -99,7 +99,12 @@
 
 
 \cleardoublepage
-\renewcommand{\contentsname}{\hfil\Huge\bfseries MỤC LỤC\hfil}
+
+\renewcommand{\contentsname}{
+\begin{center}
+    \Huge\bfseries MỤC LỤC
+\end{center}
+}
 \thispagestyle{empty}     % xóa header + số trang ở trang mục lục
 
 % Temporarily reduce paragraph spacing for table of contents
@@ -408,7 +413,7 @@ Sau khi đọc kỹ các nội dung mà hợp đồng thành lập nhóm đã n�
 \begin{itemize}
     \item \textbf{Slack}: Kênh trao đổi chính thức của nhóm, thảo luận kỹ thuật, báo cáo tiến độ, chia sẻ tài liệu.
     \begin{itemize}
-        \item Workspace: \url{https://app.slack.com/client/T09M5KGA799/C0A0AR9KJ4X}
+        \item Workspace: \\ \url{https://app.slack.com/client/T09M5KGA799/C0A0AR9KJ4X}
     \end{itemize}
 \end{itemize}
 
@@ -792,7 +797,8 @@ Retrieved from: \url{https://tetris.wiki/Gameplay}
 
 \bibitem{termios}
 The Linux Programming Interface Documentation. (n.d.). \textit{termios - Terminal I/O}. \\
-Retrieved from: \url{https://man7.org/linux/man-pages/man3/termios.3.html}
+Retrieved from:\\
+\url{https://man7.org/linux/man-pages/man3/termios.3.html}
 
 \bibitem{github_flow}
 GitHub Documentation. (n.d.). \textit{GitHub Flow - Understanding the GitHub workflow}. \\
@@ -831,7 +837,7 @@ Tetris được phát triển với kiến trúc modular theo paradigm \textbf{O
     \item \textbf{Game Loop}: Chạy vòng lặp với timing control (dropSpeedUs):
     \begin{itemize}[leftmargin=1cm]
         \item \texttt{handleInput()}: Đọc phím bấm non-blocking (fcntl), xử lý move/rotate/drop
-        \item \texttt{handleGravity()}: Auto-drop piece theo dropCounter và DROP\_INTERVAL\_TICKS
+        \item \texttt{handleGravity()}: Auto-drop piece theo \\ dropCounter và DROP\_INTERVAL\_TICKS
         \item \texttt{calculateGhostPiece()}: Tính vị trí ghost piece preview
         \item \texttt{board.draw()}: Vẽ board, pieces, UI panel thông qua ANSI escape sequences
         \item \texttt{updateDifficulty()}: Điều chỉnh dropSpeedUs theo level
@@ -971,7 +977,7 @@ Lớp quản lý ma trận bảng chơi (20×15) và hiển thị đồ họa~\c
 Lớp với các phương thức tĩnh lưu trữ khuôn mẫu cho 7 loại khối Tetromino~\cite{pajitnov1985}:
 
 \vspace{-0.4\baselineskip}
-\textbf{Các hằng số:}
+\noindent\textbf{Các hằng số:}
 \vspace{-0.6\baselineskip}
 \begin{itemize}
     \item \texttt{static constexpr int BLOCK\_SIZE = 4}: Kích thước khung chứa 4×4
@@ -979,7 +985,7 @@ Lớp với các phương thức tĩnh lưu trữ khuôn mẫu cho 7 loại kh�
 \end{itemize}
 
 \vspace{-0.4\baselineskip}
-\textbf{Dữ liệu riêng tư:}
+\noindent\textbf{Dữ liệu riêng tư:}
 \vspace{-0.6\baselineskip}
 \begin{itemize}
     \item \texttt{static char templates[7][4][4]}: Mảng ba chiều lưu hình dạng cơ bản (xoay 0°) của 7 khối
@@ -990,7 +996,7 @@ Lớp với các phương thức tĩnh lưu trữ khuôn mẫu cho 7 loại kh�
 \end{itemize}
 
 \vspace{-0.4\baselineskip}
-\textbf{Phương thức công khai:}
+\noindent\textbf{Phương thức công khai:}
 \vspace{-0.6\baselineskip}
 \begin{itemize}
     \item \texttt{static void initializeTemplates()}: Khởi tạo khuôn mẫu từ mảng TETROMINOES được mã hóa sẵn
@@ -998,7 +1004,7 @@ Lớp với các phương thức tĩnh lưu trữ khuôn mẫu cho 7 loại kh�
 \end{itemize}
 
 \vspace{-0.4\baselineskip}
-\textbf{Thuật toán xoay (getCell):}
+\noindent\textbf{Thuật toán xoay (getCell):}
 \vspace{-0.6\baselineskip}
 
 Áp dụng xoay 90° theo chiều kim đồng hồ \texttt{rotation} lần:
@@ -1014,7 +1020,7 @@ return templates[type][row][col];
 \textit{Công thức:} Mỗi lần xoay 90°: \texttt{(hàng, cột) → (cột, 3 - hàng)}
 
 \vspace{-0.4\baselineskip}
-\textbf{Ví dụ khối I ở góc xoay 0°:}
+\noindent\textbf{Ví dụ khối I ở góc xoay 0°:}
 \begin{verbatim}
     [' ']['I'][' '][' ']
     [' ']['I'][' '][' ']
@@ -1836,7 +1842,7 @@ Thanh & Sound, integration & 1 bug: Game over sound không play \\
 \subsubsection{Git workflow}
 \vspace{-0.6\baselineskip}
 
-Nhóm áp dụng GitHub Flow~\cite{github_flow} với 2-branch model:
+Nhóm áp dụng GitHub Flow~\cite{github_flow} với cấu trúc như sau:
 
 \vspace{-0.6\baselineskip}
 \begin{itemize}
