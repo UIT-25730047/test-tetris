@@ -44,7 +44,7 @@ void TetrisGame::drawStartScreen() {
     screen.reserve(512);
 
     // Clear screen and move cursor to top\-left.
-    screen += "\033[2J\033[1;1H";
+    screen += "\033[1;1H";
 
     int totalWidth = (BOARD_WIDTH * 2) + 13; // Match in\-game layout.
 
@@ -164,7 +164,7 @@ void TetrisGame::drawGameOverScreen(int rank) {
     screen.reserve(1024);
 
     // Xóa màn hình
-    screen += "\033[2J\033[1;1H";
+    screen += "\033[1;1H";
 
     int totalWidth = (BOARD_WIDTH * 2) + 13;
 
@@ -640,8 +640,8 @@ bool TetrisGame::lockPieceAndCheck(bool muteLockSound) {
 
         int oldLevel = state.level;
 
-        // +1 level per 10 lines
-        state.level = 1 + (state.linesCleared / 10);
+        // +1 level per LINES_PER_LEVEL lines
+        state.level = 1 + (state.linesCleared / LINES_PER_LEVEL);
 
         if (state.level > oldLevel) {
             SoundManager::playLevelUpSound();
@@ -838,7 +838,7 @@ void TetrisGame::drawPauseScreen() const {
     string screen;
     screen.reserve(1024);
 
-    screen += "\033[2J\033[1;1H";
+    screen += "\033[1;1H";
 
     int totalWidth = (BOARD_WIDTH * 2) + 13;
 
